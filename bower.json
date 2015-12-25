@@ -1,0 +1,6 @@
+{
+  "name": "tuchuang",
+  "dependencies": {
+    "bootstrap": "~3.3.6"
+  }
+}

@@ -1,0 +1,5 @@
+
+#picker{margin-bottom: 10px}
+#fileList{}
+.thumbnail{float:left;width:120px;margin:0 10px 10px 0}
+.thumbnail .info{width:100px;overflow: hidden; text-overflow: ellipsis}

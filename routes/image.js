@@ -4,7 +4,7 @@ var router = express.Router();
 var Imagemin = require('imagemin')
 var formidable = require('formidable')
 var fs = require('fs')
-
+/*
 router.post('/upload',function(req, res, next){   
   var files = []
   var form = formidable.IncomingForm()
@@ -16,7 +16,10 @@ router.post('/upload',function(req, res, next){
   form.on('file', function(field, file) {
     if(file.name){  
       files.push(file)
-      fs.renameSync(file.path,'upload/'+file.name)
+      //fs.renameSync(file.path,'upload/'+file.name)
+      new Imagemin().src(file.path).dest('upload/').run(function(err,files){ 
+        console.log(files[0])     
+      })
     }else{  
       fs.unlink(file.path)
     }
@@ -38,6 +41,19 @@ router.post('/upload',function(req, res, next){
 
   })
   form.parse(req)
+})
+*/
+
+router.post('/upload',function(req, res, next){     
+    var form = new formidable.IncomingForm();
+    form.keepExtensions = true
+    form.uploadDir = "upload/";
+    form.parse(req, function(error, fields, files) {
+        var file = files.file
+        new Imagemin().src(file.path).dest('upload/').run(function(err,files){ 
+               
+        })
+  });
 })
 
 module.exports = router;

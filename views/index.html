@@ -4,35 +4,46 @@
 <head>
     <meta charset="UTF-8">
     <title>完美图床</title>
-    <link rel="stylesheet" type="text/css" href="/vendor/webuploader/dist/webuploader.css" />
-    <link rel="stylesheet" type="text/css" href="/css/uploader.css" />
+    <link rel="stylesheet" href="/vendor/plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css" type="text/css" />
 </head>
 <body>
-    <div id="wrapper">
-        <div id="container">
-            <!--头部，相册选择和格式选择-->
-
-            <div id="uploader">
-                <div class="queueList">
-                    <div id="dndArea" class="placeholder">
-                        <div id="filePicker"></div>
-                        <p>或将照片拖到这里，单次最多可选300张</p>
-                    </div>
-                </div>
-                <div class="statusBar" style="display:none;">
-                    <div class="progress">
-                        <span class="text">0%</span>
-                        <span class="percentage"></span>
-                    </div><div class="info"></div>
-                    <div class="btns">
-                        <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
-                    </div>
-                </div>
-            </div>
+    <form method="post" action="/image/upload">	
+        <div id="uploader">
+            <p>Your browser doesn't have Flash, Silverlight or HTML5 support.</p>
         </div>
-    </div>
+    </form>
     <script src='/vendor/jquery/dist/jquery.min.js'></script>
-    <script src='/vendor/webuploader/dist/webuploader.min.js'></script>
-    <script src='/js/upload.js'></script>
+    <script type="text/javascript" src="/vendor/plupload/js/plupload.full.min.js"></script>
+    <script type="text/javascript" src="/vendor/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js"></script>
+    <script type="text/javascript" src="/vendor/plupload/js/i18n/zh_CN.js"></script>
+    <script>
+    $(function() {
+	
+        // Setup html5 version
+        $("#uploader").pluploadQueue({
+            // General settings
+            runtimes : 'html5,flash,silverlight,html4',
+            url : '/image/upload',
+            chunk_size: '1mb',
+            dragdrop: true,
+            
+            filters : {
+                // Maximum file size
+                max_file_size : '100mb',
+                // Specify what files to browse for
+                mime_types: [
+                    {title : "Image files", extensions : "jpg,gif,png"}
+                ]
+            },
+
+            // Resize images on clientside if we can
+            resize : {quality : 75},
+
+            flash_swf_url : '/vendor/plupload/js/Moxie.swf',
+            silverlight_xap_url : '/vendor/plupload/js/Moxie.xap'
+        });
+
+    });
+    </script>
 </body>
 </html>

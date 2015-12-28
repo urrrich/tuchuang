@@ -13,7 +13,7 @@
         </div>
     </form>
     <ul id="upload-list"></ul>
-    <input type="button" value="download zip" id="downloadzip">
+    <input type="button" value="download zip" id="downloadzip" style="display:none">
     <script src='/vendor/jquery/dist/jquery.min.js'></script>
     <script type="text/javascript" src="/vendor/plupload/js/plupload.full.min.js"></script>
     <script type="text/javascript" src="/vendor/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js"></script>
@@ -60,6 +60,9 @@
                         p: file.url                     
                    })
                    onFileUpload(file)
+               },
+               UploadComplete: function(){  
+                   $('#downloadzip').show()                   
                }     
             }
         });

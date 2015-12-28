@@ -12,6 +12,7 @@
             <p>Your browser doesn't have Flash, Silverlight or HTML5 support.</p>
         </div>
     </form>
+    <ul id="upload-list"></ul>
     <input type="button" value="download zip" id="downloadzip">
     <script src='/vendor/jquery/dist/jquery.min.js'></script>
     <script type="text/javascript" src="/vendor/plupload/js/plupload.full.min.js"></script>
@@ -19,37 +20,58 @@
     <script type="text/javascript" src="/vendor/plupload/js/i18n/zh_CN.js"></script>
     <script>
     $(function() {
-	
-        // Setup html5 version
+	    
+        var fileList = []
+        
+        function onFileUpload(file){    
+            var html = '<li>'+file.name
+            html += ' - origSize:'+ file.origSize
+            html += ' - size:'+ file.size
+            html += ' - save:'+ file.save
+            html += ' - <a href="'+ file.url +'" target="_blank">download</a>'
+            html += '</li>'
+            $('#upload-list').append(html)
+        }
+       
         $("#uploader").pluploadQueue({
-            // General settings
             runtimes : 'html5,flash,silverlight,html4',
             url : '/image/upload',
             chunk_size: '1mb',
             dragdrop: true,
             
             filters : {
-                // Maximum file size
                 max_file_size : '100mb',
-                // Specify what files to browse for
                 mime_types: [
                     {title : "Image files", extensions : "jpg,gif,png"}
                 ]
             },
-
-            // Resize images on clientside if we can
             resize : {quality : 75},
-
             flash_swf_url : '/vendor/plupload/js/Moxie.swf',
-            silverlight_xap_url : '/vendor/plupload/js/Moxie.xap'
+            silverlight_xap_url : '/vendor/plupload/js/Moxie.xap',
+            init: { 
+               FileUploaded: function(up,file,response){  
+                   console.log(file)
+                   var data = $.parseJSON(response.response)
+                   file.size = data.output.size
+                   file.save = file.origSize - data.output.size
+                   file.url = data.output.url
+                   fileList.push({  
+                        n: file.name,
+                        p: file.url                     
+                   })
+                   onFileUpload(file)
+               }     
+            }
         });
         
         $('#downloadzip').click(function(){ 
+            
             $.ajax({    
                 url: '/image/downloadzip',
                 data: { 
-                    q: [{n:'1.png',p:'upload/upload_a34e89923a983ca809a96fea0f243b0d.jpg'}]                    
+                    q: JSON.stringify(fileList)                  
                 },
+                type: 'POST',
                 dataType: 'json',
                 success: function(data){    
                     if(data.code === 0){

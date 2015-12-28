@@ -26,12 +26,13 @@ router.post('/upload',function(req, res, next){
             return res.send({code:1})    
         }
         var file = files.file
-        var dest = uploadDir
-        var output = file.path.replace(/\\/,'\\').replace(uploadTempDir,uploadDir)
+        var output = file.path.replace(/\\/,'/') 
+        output = output.replace(uploadTempDir,uploadDir)
+        output = output.replace(staticDir,'')
         
         var imgmin = new Imagemin()
         .src(file.path)
-        .dest(dest)
+        .dest(uploadDir)
         .use(Imagemin.jpegtran({progressive: true}))
         .use(Imagemin.gifsicle())
         .use(Imagemin.optipng({optimizationLevel: 3}))
@@ -75,9 +76,8 @@ router.get('/download',function(req, res, next){
     }
 })
 
-router.get('/downloadzip',function(req, res, next){ 
-    var query = req.query
-    var files = query.q   
+router.post('/downloadzip',function(req, res, next){ 
+    var files = JSON.parse(req.body.q) 
     var zippath = zipDir + Date.now() + '.zip'
     var output = fs.createWriteStream(zippath)
     var archive = archiver('zip')
@@ -89,7 +89,7 @@ router.get('/downloadzip',function(req, res, next){
     })
     archive.pipe(output)
     files.forEach(function(e){
-        archive.append(fs.createReadStream('output/'+e.p),{name:e.n})   
+        archive.append(fs.createReadStream(staticDir + e.p),{name:e.n})   
     })
     archive.finalize()
 })

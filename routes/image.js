@@ -4,14 +4,17 @@ var router = express.Router();
 var Imagemin = require('imagemin')
 var formidable = require('formidable')
 var fs = require('fs')
+var archiver = require('archiver')
 //tinypng
 /*
 var tinify = require("tinify")
 tinify.key = 'GhNK2t4QbD1VelTSJxHzo1oNEVNYNteH'
 */
 
-var uploadTempDir = 'upload_temp'
-var uploadDir = 'upload'
+var staticDir = 'output/'
+var uploadTempDir = 'upload_temp/'
+var uploadDir = staticDir + 'upload/'
+var zipDir = staticDir + 'zip/'
 
 router.post('/upload',function(req, res, next){ 
 
@@ -24,7 +27,7 @@ router.post('/upload',function(req, res, next){
         }
         var file = files.file
         var dest = uploadDir
-        var output = file.path.replace(uploadTempDir,uploadDir)
+        var output = file.path.replace(/\\/,'\\').replace(uploadTempDir,uploadDir)
         
         var imgmin = new Imagemin()
         .src(file.path)
@@ -54,12 +57,41 @@ router.post('/upload',function(req, res, next){
     });
 })
 
-router.post('/download',function(req, res, next){ 
-    
+router.get('/download',function(req, res, next){ 
+    var q = req.query
+    var filepath = q.p
+    var filename = q.n 
+    if(filename && filepath){
+        res.setHeader('Content-disposition', 'attachment; filename=' + filename)
+        var filestream = fs.createReadStream(staticDir + filepath)
+        filestream.on('data', function(chunk) {
+            res.write(chunk)
+        });
+        filestream.on('end', function() {
+            res.end()
+        });
+    }else{  
+        res.send('check your params')        
+    }
 })
 
-router.post('/downloadzip',function(req, res, next){    
-    
+router.get('/downloadzip',function(req, res, next){ 
+    var query = req.query
+    var files = query.q   
+    var zippath = zipDir + Date.now() + '.zip'
+    var output = fs.createWriteStream(zippath)
+    var archive = archiver('zip')
+    archive.on('end',function(){  
+        res.send({
+            code: 0,
+            url: zippath.replace(staticDir,'')
+        })
+    })
+    archive.pipe(output)
+    files.forEach(function(e){
+        archive.append(fs.createReadStream('output/'+e.p),{name:e.n})   
+    })
+    archive.finalize()
 })
 
 module.exports = router;

@@ -12,6 +12,7 @@
             <p>Your browser doesn't have Flash, Silverlight or HTML5 support.</p>
         </div>
     </form>
+    <input type="button" value="download zip" id="downloadzip">
     <script src='/vendor/jquery/dist/jquery.min.js'></script>
     <script type="text/javascript" src="/vendor/plupload/js/plupload.full.min.js"></script>
     <script type="text/javascript" src="/vendor/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js"></script>
@@ -42,6 +43,21 @@
             flash_swf_url : '/vendor/plupload/js/Moxie.swf',
             silverlight_xap_url : '/vendor/plupload/js/Moxie.xap'
         });
+        
+        $('#downloadzip').click(function(){ 
+            $.ajax({    
+                url: '/image/downloadzip',
+                data: { 
+                    q: [{n:'1.png',p:'upload/upload_a34e89923a983ca809a96fea0f243b0d.jpg'}]                    
+                },
+                dataType: 'json',
+                success: function(data){    
+                    if(data.code === 0){
+                        window.location.href = data.url             
+                    }
+                }
+            }) 
+        })
 
     });
     </script>

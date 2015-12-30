@@ -4,16 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <title>完美图床</title>
+    <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/vendor/plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css" type="text/css" />
+    <style type="text/css">
+    .plupload_container{padding: 0}
+    #upload-list i{display: inline-block;width:10px;padding: 2px;}
+    .plupload_file_size{display: none}
+    #downloadzip{margin-right: 15px}
+    </style>
 </head>
 <body>
+    
+<div class="container">
+
     <form method="post" action="/image/upload">	
         <div id="uploader">
             <p>Your browser doesn't have Flash, Silverlight or HTML5 support.</p>
         </div>
     </form>
-    <ul id="upload-list"></ul>
-    <input type="button" value="download zip" id="downloadzip" style="display:none">
+    
+
+    <div class="panel panel-default" style="display:none">
+	  <div class="panel-heading">
+	  	<input type="button" value="download zip" id="downloadzip" class="btn btn-default">
+	  	<span id="upload-res"></span>
+	  </div>
+	  <div class="panel-body">
+	  	<table class="table table-striped">
+	  		<thead>
+	  			<tr>
+	  				<th>filename</th>
+	  				<th>origSize</th>
+	  				<th>size</th>
+	  				<th>save</th>
+	  				<th></th>
+	  			</tr>
+	  		</thead>
+	  		<tbody id="upload-list">
+	  			
+	  		</tbody>
+	  	</table>
+	  </div>
+	</div>	
+
+    </div>
+    
     <script src='/vendor/jquery/dist/jquery.min.js'></script>
     <script type="text/javascript" src="/vendor/plupload/js/plupload.full.min.js"></script>
     <script type="text/javascript" src="/vendor/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js"></script>
@@ -22,14 +57,17 @@
     $(function() {
 	    
         var fileList = []
+        var totalSize = 0
+        var tatalSaveSize = 0
         
         function onFileUpload(file){    
-            var html = '<li>'+file.name
-            html += ' - origSize:'+ plupload.formatSize(file.origSize)
-            html += ' - size:'+ plupload.formatSize(file.size)
-            html += ' - save:'+ plupload.formatSize(file.save)
-            html += ' - <a href="'+ file.url +'" target="_blank">download</a>'
-            html += '</li>'
+            var html = '<tr><td>'+file.name + '</td>'
+            html += '<td>'+ plupload.formatSize(file.origSize) + '</td>'
+            html += '<td>'+ plupload.formatSize(file.size) + '</td>'
+            html += '<td>'+ plupload.formatSize(file.save) + '</td>'
+            html += '<td><a href="'+ file.url +'" target="_blank" class="btn btn-default btn-xs">view</a>'
+            html += ' <a href="/image/download?p='+ file.url +'&n='+ file.name +'" class="btn btn-default  btn-xs save">download</a></td>'
+            html += '</tr>'
             $('#upload-list').append(html)
         }
        
@@ -53,6 +91,7 @@
                    console.log(file)
                    var data = $.parseJSON(response.response)
                    file.size = data.output.size
+                   file.origSize = Math.max(file.origSize,data.input.size)
                    file.save = file.origSize - data.output.size
                    file.url = data.output.url
                    fileList.push({  
@@ -60,9 +99,15 @@
                         p: file.url                     
                    })
                    onFileUpload(file)
+                   totalSize += file.origSize
+                   tatalSaveSize += file.save
                },
                UploadComplete: function(){  
-                   $('#downloadzip').show()                   
+               		if(fileList.length){
+                   		$('.panel').show()
+                   		var str = 'totalSize: '+ plupload.formatSize(totalSize) + ', saveSize: ' + plupload.formatSize(tatalSaveSize)
+                		$('#upload-res').html(str)
+                	}                   
                }     
             }
         });
@@ -82,6 +127,18 @@
                     }
                 }
             }) 
+        })
+
+        $('#upload-list').on('click','.save',function(event){	
+        	event.preventDefault()
+        	$('<iframe />')
+        	.appendTo('body')
+        	.attr('src', $(this).attr('href'))
+        	.css({
+        		'visibility': 'hidden',
+        		'height': 0,
+        		'width': 0
+        	})
         })
 
     });

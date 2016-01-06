@@ -8,7 +8,7 @@ var archiver = require('archiver')
 //tinypng
 /*
 var tinify = require("tinify")
-tinify.key = 'GhNK2t4QbD1VelTSJxHzo1oNEVNYNteH'
+tinify.key = ''
 */
 
 var staticDir = 'output/'

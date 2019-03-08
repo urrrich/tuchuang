@@ -27,5 +27,6 @@ build/Release
 node_modules
 
 output
-upload
 upload_temp
+.idea/
+package-lock.json
